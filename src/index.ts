@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
+import { Resvg } from '@resvg/resvg-js'
 
 const app = new Hono()
 
@@ -136,9 +137,12 @@ app.get('/og', async (c) => {
       <text x="600" y="570" font-family="system-ui,sans-serif" font-size="22" fill="rgba(255,255,255,0.15)" font-weight="300" text-anchor="middle" letter-spacing="6">yesterday's weather</text>
     </svg>`
 
-    return new Response(svg, {
+    const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } })
+    const png = resvg.render().asPng()
+
+    return new Response(png, {
       headers: {
-        'Content-Type': 'image/svg+xml',
+        'Content-Type': 'image/png',
         'Cache-Control': 'public, max-age=1800',
       }
     })
@@ -149,7 +153,9 @@ app.get('/og', async (c) => {
       <text x="600" y="300" font-family="system-ui,sans-serif" font-size="64" fill="#fff" font-weight="700" text-anchor="middle">어제의 날씨</text>
       <text x="600" y="380" font-family="system-ui,sans-serif" font-size="28" fill="rgba(255,255,255,0.5)" font-weight="300" text-anchor="middle" letter-spacing="6">yesterday's weather</text>
     </svg>`
-    return new Response(svg, { headers: { 'Content-Type': 'image/svg+xml' } })
+    const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } })
+    const png = resvg.render().asPng()
+    return new Response(png, { headers: { 'Content-Type': 'image/png' } })
   }
 })
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yesterday-weather-v6'
+const CACHE_NAME = 'yesterday-weather-v7'
 const ASSETS = [
   '/',
   '/manifest.json',

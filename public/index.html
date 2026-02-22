@@ -18,11 +18,15 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 
   <!-- OG Tags -->
-  <meta property="og:title" content="어제의 날씨">
-  <meta property="og:description" content="어제의 기온과 날씨를 기록처럼 보여주는 미니멀 웹">
-  <meta property="og:image" content="/og">
+  <meta property="og:title" content="어제의 날씨 — yesterday's weather">
+  <meta property="og:description" content="어제보다 오늘이 더 춥나? 어제와 오늘의 기온을 나란히 비교하는 미니멀 날씨 웹">
+  <meta property="og:image" content="https://yesterday-weather.fly.dev/og">
+  <meta property="og:url" content="https://yesterday-weather.fly.dev">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="어제의 날씨 — yesterday's weather">
+  <meta name="twitter:description" content="어제보다 오늘이 더 춥나?">
+  <meta name="twitter:image" content="https://yesterday-weather.fly.dev/og">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,7 +169,26 @@
       letter-spacing: 0.3em;
       text-transform: lowercase;
       opacity: 0.2;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
     }
+    .branding:hover { opacity: 0.4; }
+    .branding:active { opacity: 0.15; }
+
+    /* Share feedback */
+    .share-toast {
+      position: fixed;
+      bottom: max(80px, calc(env(safe-area-inset-bottom) + 60px));
+      left: 50%; transform: translateX(-50%);
+      padding: 8px 20px;
+      font-size: 13px; font-family: inherit;
+      background: var(--text, #fff);
+      color: var(--bg, #1a1a1a);
+      border-radius: 20px;
+      opacity: 0; transition: opacity 0.3s ease;
+      pointer-events: none; z-index: 20;
+    }
+    .share-toast.show { opacity: 0.8; }
 
     .loading { font-size: 1.5rem; opacity: 0.5; }
     .error { font-size: 1rem; opacity: 0.7; max-width: 300px; }
@@ -337,11 +360,14 @@
             <div class="temp-diff" @click="toggleUnit()"
                  x-text="tempDiffText()"></div>
 
-            <div class="branding">yesterday's weather</div>
+            <div class="branding" @click="shareWeather()">yesterday's weather</div>
           </div>
         </template>
       </div>
     </div>
+
+    <!-- Share Toast -->
+    <div class="share-toast" :class="{ 'show': showCopied }">복사됨</div>
 
     <!-- Install Button -->
     <button class="install-btn" @click="$refs.pwaInstall.showDialog(true)">앱 설치</button>
@@ -410,6 +436,8 @@
         searching: false,
         searchTimeout: null,
         fetchingWeather: false,
+
+        showCopied: false,
 
         pullDistance: 0,
         touchStartY: 0,
@@ -488,8 +516,14 @@
               const city = JSON.parse(saved)
               await this.loadWeatherForCity(city)
             } else {
-              const pos = await this.getLocation()
-              await this.loadWeatherForLocation(pos.lat, pos.lon)
+              try {
+                const pos = await this.getLocation()
+                await this.loadWeatherForLocation(pos.lat, pos.lon)
+              } catch {
+                // Geolocation 실패 시 서울로 fallback
+                const seoul = this.popularCities[0]
+                await this.loadWeatherForCity(seoul)
+              }
             }
           } catch (err) {
             this.error = err.message || '날씨 정보를 불러올 수 없습니다'
@@ -522,6 +556,27 @@
 
         toggleUnit() { this.useCelsius = !this.useCelsius },
 
+        async shareWeather() {
+          const unit = this.useCelsius ? '°C' : '°F'
+          const yTemp = this.useCelsius ? this.yesterday.tempC : this.yesterday.tempF
+          const tTemp = this.useCelsius ? this.today.tempC : this.today.tempF
+          const diff = tTemp - yTemp
+          const diffText = diff === 0 ? '어제와 같은 온도' :
+            `어제보다 ${Math.abs(diff)}${unit} ${diff > 0 ? '높음 ↑' : '낮음 ↓'}`
+          const text = `어제 ${this.city} ${yTemp}${unit}, 오늘 ${tTemp}${unit} (${diffText})`
+          const url = window.location.origin
+
+          if (navigator.share) {
+            try { await navigator.share({ text, url }) } catch {}
+          } else {
+            try {
+              await navigator.clipboard.writeText(`${text}\n${url}`)
+              this.showCopied = true
+              setTimeout(() => { this.showCopied = false }, 1500)
+            } catch {}
+          }
+        },
+
         tempDiffText() {
           const todayT = this.useCelsius ? this.today.tempC : this.today.tempF
           const yesterdayT = this.useCelsius ? this.yesterday.tempC : this.yesterday.tempF
@@ -536,10 +591,15 @@
           this.modalOpen = true
           this.searchQuery = ''
           this.searchResults = []
+          this._escHandler = (e) => { if (e.key === 'Escape') this.closeModal() }
+          document.addEventListener('keydown', this._escHandler)
           this.$nextTick(() => { this.$refs.searchInput?.focus() })
         },
 
-        closeModal() { this.modalOpen = false },
+        closeModal() {
+          this.modalOpen = false
+          document.removeEventListener('keydown', this._escHandler)
+        },
 
         async useCurrentLocation() {
           this.closeModal()

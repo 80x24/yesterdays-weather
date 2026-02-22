@@ -54,8 +54,9 @@ fly deploy
 
 - [ ] 커스텀 도메인
 - [ ] Product Hunt 런칭
-- [ ] 공유 기능 ("어제 서울은 -7°C, 오늘은 -8°C")
-- [ ] OG 이미지 PNG 변환 (일부 플랫폼 SVG 미지원)
+- [x] 공유 기능: "yesterday's weather" 클릭 → 모바일 navigator.share / PC 클립보드 복사 (2026-02-11)
+- [x] OG 이미지 PNG 변환: @resvg/resvg-js로 SVG→PNG 변환, 전 플랫폼 호환 (2026-02-11)
+- [x] 소셜 메타태그 강화: twitter:card→summary_large_image, 절대 URL, og:url 추가, 모달 ESC 키 지원 (2026-02-11)
 
 ## 마케팅
 
