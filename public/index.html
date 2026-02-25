@@ -534,6 +534,8 @@
         },
 
         async loadWeatherForCity(c) {
+          this.currentLat = c.lat
+          this.currentLon = c.lon
           const data = await this.fetchWeather(c.lat, c.lon)
           this.applyWeatherData(data, c.name, c.countryCode)
         },
