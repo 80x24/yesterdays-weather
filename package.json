@@ -1,5 +1,5 @@
 {
-  "name": "yesterday-weather",
+  "name": "yesterdays-weather",
   "version": "0.1.0",
   "description": "어제의 날씨 - 미니멀 날씨 기록 웹",
   "module": "src/index.ts",

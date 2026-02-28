@@ -1,4 +1,4 @@
-app = "yesterday-weather"
+app = "yesterdays-weather"
 primary_region = "nrt"
 
 [build]
