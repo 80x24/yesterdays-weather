@@ -1,4 +1,4 @@
-# yesterday's weather
+# Yesterday's Weather
 
 어제의 기온과 오늘의 기온을 나란히 보여주는 극단적 미니멀 날씨 웹.
 
@@ -52,11 +52,7 @@ fly deploy
 
 ## TODO
 
-- [ ] 커스텀 도메인
-- [ ] Product Hunt 런칭
-- [x] 공유 기능: "yesterday's weather" 클릭 → 모바일 navigator.share / PC 클립보드 복사 (2026-02-11)
-- [x] OG 이미지 PNG 변환: @resvg/resvg-js로 SVG→PNG 변환, 전 플랫폼 호환 (2026-02-11)
-- [x] 소셜 메타태그 강화: twitter:card→summary_large_image, 절대 URL, og:url 추가, 모달 ESC 키 지원 (2026-02-11)
+→ [GitHub Issues](https://github.com/80x24/yesterdays-weather/issues) + [80x24 Roadmap](https://github.com/users/80x24/projects/3)
 
 ## 마케팅
 

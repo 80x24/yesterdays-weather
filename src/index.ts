@@ -134,7 +134,7 @@ app.get('/og', async (c) => {
       <text x="900" y="340" font-family="system-ui,sans-serif" font-size="160" fill="#fff" font-weight="700" text-anchor="middle" letter-spacing="-4">${currentTemp}°</text>
       <circle cx="600" cy="280" r="4" fill="rgba(255,255,255,0.2)"/>
       <text x="600" y="460" font-family="system-ui,sans-serif" font-size="32" fill="rgba(255,255,255,0.5)" font-weight="400" text-anchor="middle">${diffText} than yesterday</text>
-      <text x="600" y="570" font-family="system-ui,sans-serif" font-size="22" fill="rgba(255,255,255,0.15)" font-weight="300" text-anchor="middle" letter-spacing="6">yesterday's weather</text>
+      <text x="600" y="570" font-family="system-ui,sans-serif" font-size="22" fill="rgba(255,255,255,0.15)" font-weight="300" text-anchor="middle" letter-spacing="6">Yesterday's Weather</text>
     </svg>`
 
     const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } })
@@ -151,7 +151,7 @@ app.get('/og', async (c) => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
       <rect width="1200" height="630" fill="#1a1a2e"/>
       <text x="600" y="300" font-family="system-ui,sans-serif" font-size="64" fill="#fff" font-weight="700" text-anchor="middle">어제의 날씨</text>
-      <text x="600" y="380" font-family="system-ui,sans-serif" font-size="28" fill="rgba(255,255,255,0.5)" font-weight="300" text-anchor="middle" letter-spacing="6">yesterday's weather</text>
+      <text x="600" y="380" font-family="system-ui,sans-serif" font-size="28" fill="rgba(255,255,255,0.5)" font-weight="300" text-anchor="middle" letter-spacing="6">Yesterday's Weather</text>
     </svg>`
     const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } })
     const png = resvg.render().asPng()
