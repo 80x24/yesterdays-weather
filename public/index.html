@@ -99,6 +99,12 @@
       cursor: pointer;
       transition: opacity 0.15s ease;
       margin-bottom: 2.5rem;
+      background: none;
+      border: none;
+      color: inherit;
+      font-family: inherit;
+      display: block;
+      width: 100%;
     }
     .location:hover { opacity: 0.8; }
     .location:active { opacity: 0.3; }
@@ -193,6 +199,26 @@
 
     .loading { font-size: 1.5rem; opacity: 0.5; }
     .error { font-size: 1rem; opacity: 0.7; max-width: 300px; }
+
+    /* Screen reader only */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    /* Focus visible */
+    :focus-visible {
+      outline: 2px solid var(--text, #fff);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    .gps-btn:focus-visible,
+    .install-btn:focus-visible,
+    .city-item:focus-visible {
+      outline: 2px solid var(--text, #fff);
+      outline-offset: 2px;
+    }
 
     /* Modal */
     .modal-overlay {
@@ -314,64 +340,77 @@
 <body>
   <div class="container" x-data="weather()">
     <!-- Loading Overlay -->
-    <div class="loading-overlay" :class="{ 'show': fetchingWeather }">
-      <div class="loading-spinner"></div>
+    <div class="loading-overlay" :class="{ 'show': fetchingWeather }" role="status" aria-live="polite">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <span class="sr-only" x-show="fetchingWeather">날씨 정보를 불러오는 중입니다</span>
     </div>
 
-    <div class="content-wrapper"
+    <main class="content-wrapper"
          :class="{ 'animating': !isDragging }"
          :style="`transform: translateY(${pullDistance}px)`"
          @touchstart="onTouchStart"
          @touchmove="onTouchMove"
          @touchend="onTouchEnd">
 
-      <div class="pull-spinner" :class="{ 'visible': pullDistance > 30, 'refreshing': isRefreshing }"></div>
+      <div class="pull-spinner" :class="{ 'visible': pullDistance > 30, 'refreshing': isRefreshing }" aria-hidden="true"></div>
 
       <div class="content">
         <template x-if="loading">
-          <div class="loading">...</div>
+          <div class="loading" role="status" aria-live="polite">
+            <span class="sr-only">날씨 정보를 불러오는 중입니다</span>
+            <span aria-hidden="true">...</span>
+          </div>
         </template>
 
         <template x-if="error">
-          <div class="error" x-text="error"></div>
+          <div class="error" role="alert" x-text="error"></div>
         </template>
 
         <template x-if="!loading && !error">
-          <div>
-            <div class="location" @click="openModal()" x-text="city"></div>
+          <div aria-live="polite">
+            <h1 class="sr-only">어제의 날씨</h1>
 
-            <div class="weather-row" @click="toggleUnit()">
+            <button class="location" @click="openModal()" x-text="city"
+                    :aria-label="`현재 도시: ${city}. 클릭하여 도시 변경`"></button>
+
+            <section class="weather-row" @click="toggleUnit()" role="button" tabindex="0"
+                     @keydown.enter="toggleUnit()" @keydown.space.prevent="toggleUnit()"
+                     :aria-label="`어제 ${useCelsius ? yesterday.tempC + '°C' : yesterday.tempF + '°F'}, 오늘 ${useCelsius ? today.tempC + '°C' : today.tempF + '°F'}. 클릭하여 단위 전환`">
               <div class="weather-col">
-                <div class="col-label">어제</div>
-                <div class="col-temp">
+                <div class="col-label" id="label-yesterday">어제</div>
+                <div class="col-temp" aria-labelledby="label-yesterday">
                   <span x-text="useCelsius ? yesterday.tempC : yesterday.tempF"></span><span class="col-unit" x-text="useCelsius ? '°C' : '°F'"></span>
                 </div>
               </div>
 
-              <div class="separator"></div>
+              <div class="separator" aria-hidden="true"></div>
 
               <div class="weather-col">
-                <div class="col-label">오늘</div>
-                <div class="col-temp">
+                <div class="col-label" id="label-today">오늘</div>
+                <div class="col-temp" aria-labelledby="label-today">
                   <span x-text="useCelsius ? today.tempC : today.tempF"></span><span class="col-unit" x-text="useCelsius ? '°C' : '°F'"></span>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div class="temp-diff" @click="toggleUnit()"
-                 x-text="tempDiffText()"></div>
+            <div class="temp-diff" @click="toggleUnit()" role="button" tabindex="0"
+                 @keydown.enter="toggleUnit()" @keydown.space.prevent="toggleUnit()"
+                 x-text="tempDiffText()"
+                 :aria-label="tempDiffText()"></div>
 
-            <div class="branding" @click="shareWeather()">Yesterday's Weather</div>
+            <div class="branding" @click="shareWeather()" role="button" tabindex="0"
+                 @keydown.enter="shareWeather()" @keydown.space.prevent="shareWeather()"
+                 aria-label="날씨 정보 공유하기">Yesterday's Weather</div>
           </div>
         </template>
       </div>
-    </div>
+    </main>
 
     <!-- Share Toast -->
-    <div class="share-toast" :class="{ 'show': showCopied }">복사됨</div>
+    <div class="share-toast" :class="{ 'show': showCopied }" role="status" aria-live="polite">복사됨</div>
 
     <!-- Install Button -->
-    <button class="install-btn" @click="$refs.pwaInstall.showDialog(true)">앱 설치</button>
+    <button class="install-btn" @click="$refs.pwaInstall.showDialog(true)" aria-label="앱 설치">앱 설치</button>
     <pwa-install
       x-ref="pwaInstall"
       manifest-url="/manifest.json"
@@ -381,25 +420,32 @@
     ></pwa-install>
 
     <!-- City Selection Modal -->
-    <div class="modal-overlay" :class="{ 'open': modalOpen }" @click.self="closeModal()">
+    <div class="modal-overlay" :class="{ 'open': modalOpen }" @click.self="closeModal()"
+         role="dialog" aria-modal="true" aria-label="도시 선택"
+         :aria-hidden="!modalOpen">
       <div class="modal">
         <div class="modal-header">
-          <input type="text" class="modal-search" placeholder="Search city..."
-                 x-model="searchQuery" @input="debounceSearch()" x-ref="searchInput">
-          <button class="gps-btn" @click="useCurrentLocation()" title="Use current location">
-            <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+          <label for="city-search" class="sr-only">도시 검색</label>
+          <input type="text" id="city-search" class="modal-search" placeholder="Search city..."
+                 x-model="searchQuery" @input="debounceSearch()" x-ref="searchInput"
+                 autocomplete="off">
+          <button class="gps-btn" @click="useCurrentLocation()" aria-label="현재 위치 사용">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" role="listbox" aria-label="도시 목록">
           <template x-if="searching">
-            <div class="city-loading">Searching...</div>
+            <div class="city-loading" role="status" aria-live="polite">Searching...</div>
           </template>
           <template x-if="!searching && searchQuery.length > 0 && searchResults.length === 0">
-            <div class="city-empty">No cities found</div>
+            <div class="city-empty" role="status" aria-live="polite">No cities found</div>
           </template>
           <template x-if="!searching && searchQuery.length > 0">
             <template x-for="c in searchResults" :key="c.place_id">
-              <div class="city-item" :class="{ 'selected': c.name === city }" @click="selectCity(c)">
+              <div class="city-item" role="option"
+                   :aria-selected="c.name === city"
+                   :class="{ 'selected': c.name === city }" @click="selectCity(c)"
+                   tabindex="0" @keydown.enter="selectCity(c)">
                 <div class="city-name" x-text="c.name"></div>
                 <div class="city-country" x-text="c.country"></div>
               </div>
@@ -407,7 +453,10 @@
           </template>
           <template x-if="!searching && searchQuery.length === 0">
             <template x-for="c in popularCities" :key="c.name">
-              <div class="city-item" :class="{ 'selected': c.name === city }" @click="selectCity(c)">
+              <div class="city-item" role="option"
+                   :aria-selected="c.name === city"
+                   :class="{ 'selected': c.name === city }" @click="selectCity(c)"
+                   tabindex="0" @keydown.enter="selectCity(c)">
                 <div class="city-name" x-text="c.name"></div>
                 <div class="city-country" x-text="c.country"></div>
               </div>
