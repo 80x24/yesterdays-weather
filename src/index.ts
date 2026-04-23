@@ -5,6 +5,6 @@ import app from './app'
 app.use('/*', serveStatic({ root: './public' }))
 
 export default {
-  port: 3000,
+  port: parseInt(process.env.PORT || '3000'),
   fetch: app.fetch
 }
