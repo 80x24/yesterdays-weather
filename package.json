@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/bun": "latest",
     "vitest": "^4.1.0"
   },
@@ -18,6 +19,7 @@
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "hono": "^4.11.7"
+    "hono": "^4.11.7",
+    "open-tongues": "^0.1.23"
   }
 }

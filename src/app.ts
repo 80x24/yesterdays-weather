@@ -6,6 +6,32 @@ const FETCH_TIMEOUT_MS = 10000
 
 const app = new Hono()
 
+// open-tongues: 클라이언트 번들 서빙 + 번역 API 마운트 (Bun 전용)
+const tonguesApiKey = process.env.ANTHROPIC_API_KEY
+if (tonguesApiKey && typeof Bun !== 'undefined') {
+  const { createHandler } = await import('open-tongues')
+  const { resolve, dirname } = await import('path')
+  const { fileURLToPath } = await import('url')
+
+  const __dirname = dirname(fileURLToPath(import.meta.url))
+  const clientPath = resolve(__dirname, '../node_modules/open-tongues/dist/t.js')
+  let clientBundle: string | null = null
+
+  app.get('/tongues/t.js', async (c) => {
+    if (!clientBundle) {
+      clientBundle = await Bun.file(clientPath).text()
+    }
+    c.header('Content-Type', 'application/javascript')
+    c.header('Cache-Control', 'public, max-age=300')
+    return c.body(clientBundle)
+  })
+
+  app.route('/tongues', createHandler({
+    apiKey: tonguesApiKey,
+    dbPath: './tongues.db',
+  }))
+}
+
 // 어제 날씨 API (legacy, backward compatible)
 app.get('/api/yesterday', async (c) => {
   const lat = c.req.query('lat')
